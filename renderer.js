@@ -92,12 +92,15 @@ export class Renderer {
         this.t %= Math.PI * 2;
 
         const projection = glMatrix.mat4.create();
+        // perspective ( field of view in rads, aspect ratio [w/h], nearest, furthest)
         glMatrix.mat4.perspective(projection, Math.PI / 4, 800/600, 0.1, 10);
 
         const view = glMatrix.mat4.create();
+        // lookAt ( location of camera, looking at point, up vector)
         glMatrix.mat4.lookAt(view, [-2, 0, 2], [0, 0, 0], [0, 0, 1]);
 
         const model = glMatrix.mat4.create();
+        // rotate ( angle to rotate, axis around which to rotate)
         glMatrix.mat4.rotate(model, model, this.t, [0, 0, -1]);
 
         this.device.queue.writeBuffer(this.uniformBuffer, 0, model);
@@ -110,7 +113,7 @@ export class Renderer {
         const renderpass = commandEncoder.beginRenderPass({
             colorAttachments: [{
                 view: textureView,
-                clearValue: { r: 0.5, g: 0.0, b: 0.25, a: 1.0 },
+                clearValue: { r: 1, g: 1, b: 1, a: 1 },
                 loadOp: "clear",
                 storeOp: "store"
             }]
