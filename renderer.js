@@ -1,5 +1,6 @@
 import { wcode } from "/shaders.js";
 import { TriangleMesh } from "/triangle_mesh.js";
+import { Material } from "/material.js";
 
 const p = glMatrix.mat4.create();
 
@@ -12,7 +13,7 @@ export class Renderer {
 
         await this.setupDevice();
 
-        this.createAssets();
+        await this.createAssets();
 
         await this.makePipeline();
 
@@ -42,6 +43,16 @@ export class Renderer {
                     binding: 0,
                     visibility: GPUShaderStage.VERTEX,
                     buffer: {}
+                },
+                {
+                    binding: 1,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    texture: {}
+                },
+                {
+                    binding: 2,
+                    visibility: GPUShaderStage.FRAGMENT,
+                    sampler: {}
                 }
             ] 
         });
@@ -54,6 +65,14 @@ export class Renderer {
                     resource: {
                         buffer: this.uniformBuffer
                     }
+                },
+                {
+                    binding: 1,
+                    resource: this.material.view
+                },
+                {
+                    binding: 2,
+                    resource: this.material.sampler
                 }
             ] 
         });
@@ -82,8 +101,11 @@ export class Renderer {
         });
     }
 
-    createAssets() {
+    async createAssets() {
         this.triangleMesh = new TriangleMesh(this.device);
+        this.material = new Material();
+
+        await this.material.initialize(this.device, "/greenhead.png");
     }
 
     render = () => {
@@ -113,7 +135,7 @@ export class Renderer {
         const renderpass = commandEncoder.beginRenderPass({
             colorAttachments: [{
                 view: textureView,
-                clearValue: { r: 1, g: 1, b: 1, a: 1 },
+                clearValue: { r: 0.5, g: 0.5, b: 0.5, a: 1 },
                 loadOp: "clear",
                 storeOp: "store"
             }]
