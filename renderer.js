@@ -1,22 +1,16 @@
-import { wcode } from "/shaders.js";
+import { shader } from "/shaders.js";
 import { TriangleMesh } from "/triangle_mesh.js";
 import { Material } from "/material.js";
-
-const p = glMatrix.mat4.create();
 
 export class Renderer {
     constructor(canvas) {
         this.canvas = canvas;
-        this.t = 0.01;
+        this.angle = 0.01;
     }
     async Initialize() {
-
         await this.setupDevice();
-
         await this.createAssets();
-
         await this.makePipeline();
-
         this.render();
     }
     async setupDevice() {
@@ -82,14 +76,14 @@ export class Renderer {
         this.pipeline = this.device.createRenderPipeline({
             vertex: {
                 module: this.device.createShaderModule({
-                    code: wcode
+                    code: shader
                 }),
                 entryPoint: "vs_main",
                 buffers: [this.triangleMesh.bufferLayout]
             },
             fragment: {
                 module: this.device.createShaderModule({
-                    code: wcode
+                    code: shader
                 }),
                 entryPoint: "fs_main",
                 targets: [{ format: this.format }]
@@ -110,8 +104,8 @@ export class Renderer {
 
     render = () => {
 
-        this.t += 0.01;
-        this.t %= Math.PI * 2;
+        this.angle += 0.01;
+        this.angle %= Math.PI * 2;
 
         const projection = glMatrix.mat4.create();
         // perspective ( field of view in rads, aspect ratio [w/h], nearest, furthest)
@@ -123,7 +117,7 @@ export class Renderer {
 
         const model = glMatrix.mat4.create();
         // rotate ( angle to rotate, axis around which to rotate)
-        glMatrix.mat4.rotate(model, model, this.t, [0, 0, -1]);
+        glMatrix.mat4.rotate(model, model, this.angle, [0, 0, -1]);
 
         this.device.queue.writeBuffer(this.uniformBuffer, 0, model);
         this.device.queue.writeBuffer(this.uniformBuffer, 64, view);

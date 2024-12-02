@@ -1,4 +1,4 @@
-export const wcode = `
+export const shader = `
 struct TransformData {
     model: mat4x4<f32>,
     view: mat4x4<f32>,
