@@ -4,4 +4,11 @@ const canvas = document.querySelector("canvas");
 
 const renderer = new Renderer(canvas);
 
-renderer.Initialize();
+await renderer.Initialize();
+
+function animate() {
+    renderer.render();
+    requestAnimationFrame(animate);
+}
+
+requestAnimationFrame(animate);

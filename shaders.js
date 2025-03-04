@@ -4,18 +4,19 @@ struct TransformData {
     view: mat4x4<f32>,
     projection: mat4x4<f32>
 };
-@binding(0) @group(0) var<uniform> transformUBO: TransformData;
+@binding(0) @group(0) var<uniform> transformUBO: TransformData; // 'uniform' makes this effectively global/available in all shaders in the group 0
 @binding(1) @group(0) var myTexture: texture_2d<f32>;
 @binding(2) @group(0) var mySampler: sampler;
 
+
 struct Fragment {
     @builtin(position) Position : vec4<f32>,
-    @location(0) TexCoord : vec2<f32>
+    @location(0) Color : vec4<f32>
 };
 
-//fn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {
 @vertex
-fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexTexCoord: vec2<f32>) -> Fragment {
+//fn vs_main(@builtin(vertex_index) v_id: u32) -> Fragment {
+fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexColor: vec3<f32>) -> Fragment {
 
     // var positions = array<vec2<f32>, 3> (
     //     vec2<f32>(0.0, 0.5),
@@ -29,10 +30,34 @@ fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexTexCoord: 
     //     vec3<f32>(0.0, 0.0, 1.0)
     // );
 
-    var output : Fragment;
+    // var output : Fragment;
     // output.Position = vec4<f32>(positions[v_id], 0.0, 1.0);
-    output.Position = transformUBO.projection * transformUBO.view * transformUBO.model *  vec4<f32>(vertexPosition, 1.0);
     // output.Color = vec4<f32>(colors[v_id], 1.0);
+
+    var output : Fragment;
+    output.Position = transformUBO.projection * transformUBO.view * transformUBO.model * vec4<f32>(vertexPosition, 1.0); // pt -> world -> camera -> 2d+clip
+    output.Color = vec4<f32>(vertexColor, 1.0);
+
+    return output;
+}
+
+@fragment
+fn fs_main(@location(0) Color: vec4<f32>) -> @location(0) vec4<f32> {
+    return Color;
+}
+
+
+/*
+struct Fragment {
+    @builtin(position) Position : vec4<f32>,
+    @location(0) TexCoord : vec2<f32>
+};
+
+@vertex
+fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexTexCoord: vec2<f32>) -> Fragment {
+
+    var output : Fragment;
+    output.Position = transformUBO.projection * transformUBO.view * transformUBO.model *  vec4<f32>(vertexPosition, 1.0);
     output.TexCoord = vertexTexCoord;
 
     return output;
@@ -42,4 +67,5 @@ fn vs_main(@location(0) vertexPosition: vec3<f32>, @location(1) vertexTexCoord: 
 fn fs_main(@location(0) TexCoord: vec2<f32>) -> @location(0) vec4<f32> {
     return textureSample(myTexture, mySampler, TexCoord);
 }
+*/
 `;
